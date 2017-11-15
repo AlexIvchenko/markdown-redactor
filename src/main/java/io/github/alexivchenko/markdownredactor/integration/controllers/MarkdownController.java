@@ -10,6 +10,7 @@ import java.util.Set;
 /**
  * @author Alex Ivchenko
  */
+@CrossOrigin
 @RestController
 public class MarkdownController {
 

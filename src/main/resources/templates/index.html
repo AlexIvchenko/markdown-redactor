@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header('Blog index')"></head>
+<body>
+<div id="app" class="container">
+    <div v-for="doc in docs" class="card mb-3" style="max-width: 20rem;">
+        <div class="card-body">
+            <h4 class="card-title">{{ doc.name }}</h4>
+            <p class="card-text">{{ doc.description }}</p>
+            <p class="card-text">
+                <small class="text-muted">Last updated 3 mins ago</small>
+            </p>
+            <button type="button" class="btn btn-primary">Edit</button>
+            <button type="button" class="btn btn-danger">Delete</button>
+        </div>
+    </div>
+</div>
+</body>
+<div th:replace="fragments/footer :: foot"></div>
+
+<script>
+    new Vue({
+        el: "#app",
+        data: {docs: []},
+        mounted() {
+            this.fetch();
+        },
+        methods: {
+            fetch() {
+                axios.get("http://localhost:8080/api/users/Alex/docs").then(function (response) {
+                    this.docs = response.data
+                }.bind(this))
+            }
+        }
+    })
+</script>
+
+</html>

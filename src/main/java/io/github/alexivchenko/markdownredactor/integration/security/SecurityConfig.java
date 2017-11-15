@@ -4,7 +4,6 @@ import io.github.alexivchenko.markdownredactor.core.repositories.jpa.UserReposit
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -24,12 +23,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/api/users").permitAll()
-                .antMatchers("/api/users/{username}/")
-                    .access("@authService.hasPermission(authentication, #username)")
-                .antMatchers("/api/users/{username}/docs/{docId}")
-                    .access("@authService.hasPermission(authentication, #username, #docId)")
-                .and().httpBasic();
+                .anyRequest().permitAll();
+//                .antMatchers(HttpMethod.POST, "/api/users").permitAll()
+//                .antMatchers("/api/users/{username}/")
+//                    .access("@authService.hasPermission(authentication, #username)")
+//                .antMatchers("/api/users/{username}/docs/{docId}")
+//                    .access("@authService.hasPermission(authentication, #username, #docId)")
+//                .and().httpBasic();
     }
 
     @Autowired
