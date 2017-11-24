@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:v-on="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/header :: header('Markdown Redactor')"></head>
+<body>
+
+<div th:replace="fragments/header :: page-header"></div>
+
+<div class="container" id="app">
+    <form class="form-inline">
+        <div class="form-group mx-sm-3">
+            <label for="docName" class="sr-only">Name</label>
+            <input v-model="newDoc.name" type="text" class="form-control" id="docName" placeholder="Document name">
+        </div>
+        <button class="btn btn-primary" v-on:click="doCreateNewDoc">Create new document</button>
+    </form>
+    <div class="col-md-4" v-for="(doc, index) in docs">
+        <div class="card">
+            <h4 class="card-header">{{ doc.name }}</h4>
+            <div class="card-body">
+                <button class="btn btn-primary" v-if="doc._links.edit" v-on:click="doEditDoc(index)">Edit</button>
+                <button class="btn btn-danger" v-if="doc._links.delete" v-on:click="doDeleteDoc(index)">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+<script th:inline="javascript">
+    var app = new Vue({
+        el: '#app',
+        data: {
+            /*<![CDATA[*/
+            api: /*[[${api}]]*/ null,
+            /*]]>*/
+            newDoc: {
+                name: "",
+                content: ""
+            },
+            actions: null,
+            docs: []
+        },
+        created: function () {
+            console.log("vue created");
+            this.createLoadActionsRequest()
+                .then(function (response) {
+                    this.handleLoadActionsRequest(response);
+                    return this.createGetDocsRequest();
+                }.bind(this))
+                .then(function (response) {
+                    this.handleGetDocsRequest(response);
+                    console.log(this.docs);
+                }.bind(this));
+        },
+        methods: {
+            doCreateNewDoc: function () {
+                var createNewDocUrl = this.actions.createDoc.href;
+                console.log("create new doc url: " + createNewDocUrl);
+                return axios.post(createNewDocUrl, this.newDoc)
+                    .then(function (response) {
+                        this.docs.unshift(response);
+                        this.newDoc = null;
+                    }.bind(this))
+                    .catch(function (error) {
+                        console.error(error);
+                    });
+            },
+
+            doDeleteDoc: function (docIndex) {
+                var doc = this.docs[docIndex];
+                var deleteDocUrl = doc._links.delete.href;
+                console.log("delete doc url: " + deleteDocUrl);
+                return axios.delete(deleteDocUrl)
+                    .then(function (response) {
+                        return this.createGetDocsRequest();
+                    }.bind(this))
+                    .then(function (response) {
+                        this.handleGetDocsRequest(response);
+                    }.bind(this))
+                    .catch(function (error) {
+                        console.error(error);
+                    });
+            },
+
+            createGetDocsRequest: function () {
+                var getDocsUrl = this.actions.getDocs.href;
+                console.log("get docs url: " + getDocsUrl);
+                return axios.get(getDocsUrl);
+            },
+
+            handleGetDocsRequest: function (response) {
+                this.docs = response.data;
+            },
+
+            createLoadActionsRequest: function () {
+                console.log("api url: " + this.api);
+                return axios.get(this.api);
+            },
+
+            handleLoadActionsRequest: function (response) {
+                this.actions = response.data._links;
+                console.log("actions: " + this.actions);
+            }
+        }
+    })
+</script>
+</html>

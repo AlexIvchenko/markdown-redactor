@@ -18,4 +18,6 @@ public interface MarkdownIntegrationService {
     Set<MarkdownInfoRes> findUserDocs(String username, String pattern);
 
     MarkdownRes getDoc(Long docId);
+
+    void delete(Long docId);
 }

@@ -1,4 +1,4 @@
-package io.github.alexivchenko.markdownredactor.integration.security;
+package io.github.alexivchenko.markdownredactor.security;
 
 import io.github.alexivchenko.markdownredactor.core.model.User;
 import org.springframework.security.core.Authentication;
@@ -8,6 +8,8 @@ import org.springframework.security.core.Authentication;
  */
 public interface AuthService {
     User signUp(String username, String password);
+
+    User currentUser();
 
     boolean hasPermission(Authentication auth, String username);
 

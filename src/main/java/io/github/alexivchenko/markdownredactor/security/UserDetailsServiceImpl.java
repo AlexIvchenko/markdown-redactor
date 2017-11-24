@@ -1,4 +1,4 @@
-package io.github.alexivchenko.markdownredactor.integration.security;
+package io.github.alexivchenko.markdownredactor.security;
 
 import io.github.alexivchenko.markdownredactor.core.model.User;
 import io.github.alexivchenko.markdownredactor.core.repositories.jpa.UserRepository;

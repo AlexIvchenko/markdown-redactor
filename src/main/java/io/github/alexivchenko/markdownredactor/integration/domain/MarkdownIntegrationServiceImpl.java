@@ -31,6 +31,9 @@ public class MarkdownIntegrationServiceImpl implements MarkdownIntegrationServic
 
     @Override
     public MarkdownRes create(String username, String docId, String content) {
+        if (content == null) {
+            content = "";
+        }
         log.info("user: {} is creating doc: {}, size: {}", username, docId, content.length());
         Markdown markdown = service.create(username, docId, content);
         MarkdownRes res = resAsm.toResource(markdown);
@@ -67,5 +70,10 @@ public class MarkdownIntegrationServiceImpl implements MarkdownIntegrationServic
     public MarkdownRes getDoc(Long docId) {
         Markdown doc = service.getDoc(docId);
         return resAsm.toResource(doc);
+    }
+
+    @Override
+    public void delete(Long docId) {
+       service.delete(docId);
     }
 }

@@ -2,7 +2,7 @@ package io.github.alexivchenko.markdownredactor.integration.domain;
 
 import io.github.alexivchenko.markdownredactor.core.model.User;
 import io.github.alexivchenko.markdownredactor.integration.resources.UserRes;
-import io.github.alexivchenko.markdownredactor.integration.security.AuthService;
+import io.github.alexivchenko.markdownredactor.security.AuthService;
 import org.springframework.stereotype.Service;
 
 /**

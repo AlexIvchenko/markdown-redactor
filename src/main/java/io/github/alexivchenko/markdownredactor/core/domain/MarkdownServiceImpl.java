@@ -80,4 +80,10 @@ public class MarkdownServiceImpl implements MarkdownService {
         log.info("retrieved doc {}", doc);
         return doc;
     }
+
+    @Override
+    public void delete(Long docId) {
+        markdownInfoRepository.delete(docId);
+        contentRepository.delete(docId);
+    }
 }

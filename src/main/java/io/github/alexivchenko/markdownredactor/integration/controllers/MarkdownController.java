@@ -1,8 +1,12 @@
 package io.github.alexivchenko.markdownredactor.integration.controllers;
 
+import io.github.alexivchenko.markdownredactor.dto.MarkdownDto;
 import io.github.alexivchenko.markdownredactor.integration.domain.MarkdownIntegrationService;
 import io.github.alexivchenko.markdownredactor.integration.resources.MarkdownInfoRes;
 import io.github.alexivchenko.markdownredactor.integration.resources.MarkdownRes;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -10,7 +14,7 @@ import java.util.Set;
 /**
  * @author Alex Ivchenko
  */
-@CrossOrigin
+@Slf4j
 @RestController
 public class MarkdownController {
 
@@ -25,18 +29,24 @@ public class MarkdownController {
         return service.getUserDocs(username);
     }
 
-    @PostMapping("/api/users/{username}/docs")
-    public MarkdownRes create(@PathVariable("username") final String username,
-                                          @ModelAttribute("name") final String name,
-                                          @ModelAttribute("content") final String content) {
-        return service.create(username, name, content);
+    @PostMapping(value = "/api/users/{username}/docs")
+    public MarkdownRes create(@PathVariable("username") final String username, @RequestBody MarkdownDto dto) {
+        log.info(dto.getName());
+        return service.create(username, dto.getName(), dto.getContent());
     }
 
     @PostMapping("/api/users/{username}/docs/{docId}")
     public MarkdownRes update(@PathVariable("username") final String username,
                               @PathVariable("docId") final Long docId,
-                              @ModelAttribute("content") final String content) {
+                              @RequestBody final String content) {
         return service.update(docId, content);
+    }
+
+    @DeleteMapping("/api/users/{username}/docs/{docId}")
+    public ResponseEntity<Void> delete(@PathVariable("username") final String username,
+                                       @PathVariable("docId") final Long docId) {
+        service.delete(docId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/api/users/{username}/docs/{docId}")

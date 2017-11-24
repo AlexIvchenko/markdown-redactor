@@ -1,4 +1,4 @@
-package io.github.alexivchenko.markdownredactor.integration.security;
+package io.github.alexivchenko.markdownredactor.security;
 
 /**
  * @author Alex Ivchenko
