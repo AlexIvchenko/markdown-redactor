@@ -7,19 +7,32 @@
 <div th:replace="fragments/header :: page-header"></div>
 
 <div class="container" id="app">
-    <form class="form-inline">
-        <div class="form-group mx-sm-3">
-            <label for="docName" class="sr-only">Name</label>
-            <input v-model="newDoc.name" type="text" class="form-control" id="docName" placeholder="Document name">
+    <div class="row">
+        <div class="col-4">
+            <div class="input-group">
+                <input type="text" class="form-control" v-model="name" placeholder="Search for..."
+                       aria-label="Search for..."/>
+                <span class="input-group-btn">
+                <button class="btn btn-secondary" v-if="filteredDocs.length == 0"
+                        v-on:click="doCreateNewDoc" type="button">Create!</button>
+                </span>
+            </div>
+            <div class="list-group" id="list-tab" role="tablist">
+                <a v-for="doc in filteredDocs" v-on:click="toggleSelected(doc)"
+                   class="list-group-item list-group-item-action" data-toggle="list" role="tab" aria-controls="doc">
+                    {{ doc.name }} {{ doc.selected }}</a>
+            </div>
         </div>
-        <button class="btn btn-primary" v-on:click="doCreateNewDoc">Create new document</button>
-    </form>
-    <div class="col-md-4" v-for="(doc, index) in docs">
-        <div class="card">
-            <h4 class="card-header">{{ doc.name }}</h4>
-            <div class="card-body">
-                <button class="btn btn-primary" v-if="doc._links.edit" v-on:click="doEditDoc(index)">Edit</button>
-                <button class="btn btn-danger" v-if="doc._links.delete" v-on:click="doDeleteDoc(index)">Delete</button>
+        <div class="col-8">
+            <div class="tab-content" id="nav-tabContent">
+                <div v-for="doc in filteredDocs" class="tab-pane fade"
+                     v-bind:class="{ show: doc.selected, active: doc.selected }" role="tabpanel">
+                    {{ doc.name }}
+                    {{ doc.selected }}
+                    <button class="btn btn-primary" v-if="doc._links.edit" v-on:click="doEditDoc(doc)">Edit</button>
+                    <button class="btn btn-danger" v-if="doc._links.delete" v-on:click="doDeleteDoc(doc)">Delete
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -33,12 +46,17 @@
             /*<![CDATA[*/
             api: /*[[${api}]]*/ null,
             /*]]>*/
-            newDoc: {
-                name: "",
-                content: ""
-            },
+            name: "",
             actions: null,
             docs: []
+        },
+        computed: {
+            filteredDocs: function () {
+                var self = this;
+                return self.docs.filter(function (doc) {
+                    return doc.name.indexOf(self.name) !== -1
+                })
+            }
         },
         created: function () {
             console.log("vue created");
@@ -53,21 +71,39 @@
                 }.bind(this));
         },
         methods: {
-            doCreateNewDoc: function () {
+            doCreateNewDoc: function (event) {
                 var createNewDocUrl = this.actions.createDoc.href;
                 console.log("create new doc url: " + createNewDocUrl);
-                return axios.post(createNewDocUrl, this.newDoc)
+                return axios.post(createNewDocUrl, {name: this.name, content: ''})
                     .then(function (response) {
-                        this.docs.unshift(response);
-                        this.newDoc = null;
+                        return this.createGetDocsRequest();
+                    }.bind(this))
+                    .then(function (response) {
+                        this.handleGetDocsRequest(response);
                     }.bind(this))
                     .catch(function (error) {
                         console.error(error);
                     });
             },
 
-            doDeleteDoc: function (docIndex) {
-                var doc = this.docs[docIndex];
+            toggleSelected: function (doc) {
+                var i = this.docs.indexOf(doc);
+                this.deselectAllDocs();
+                doc = this.docs[i];
+                doc.selected = true;
+                Vue.set(this.docs, i, doc);
+                console.info(this.docs)
+            },
+
+            deselectAllDocs: function () {
+                for (let i = 0; i < this.docs.length; i++) {
+                    const doc = this.docs[i];
+                    doc.selected = false;
+                    Vue.set(this.docs, i, doc);
+                }
+            },
+
+            doDeleteDoc: function (doc) {
                 var deleteDocUrl = doc._links.delete.href;
                 console.log("delete doc url: " + deleteDocUrl);
                 return axios.delete(deleteDocUrl)
@@ -90,6 +126,7 @@
 
             handleGetDocsRequest: function (response) {
                 this.docs = response.data;
+                this.deselectAllDocs();
             },
 
             createLoadActionsRequest: function () {
