@@ -26,22 +26,26 @@
         <div class="col-4">
             <div class="form-group">
                 <label for="content">Content</label>
-                <textarea v-model="currentDoc.content" class="form-control" id="content" rows="20"></textarea>
+                <textarea v-model="currentDoc.content" v-on:input="update" class="form-control" id="content" rows="20"></textarea>
             </div>
             <button class="btn btn-primary" v-if="currentDoc._links.edit" v-on:click="doEditDoc()">Edit</button>
             <button class="btn btn-danger" v-if="currentDoc._links.delete" v-on:click="doDeleteDoc()">Delete</button>
         </div>
         <div class="col-4">
             <div class="form-group">
-                <label for="content">Markdown</label>
-                <textarea v-model="currentDoc.content" class="form-control" id="markdown" rows="20"></textarea>
+                <label>Markdown</label>
+                <div v-html="compiledMarkdown"></div>
             </div>
         </div>
+
     </div>
 </div>
 <div th:replace="fragments/footer :: footer"></div>
 </body>
+<script type="text/javascript" src="webjars/marked/0.3.2/marked.js"></script>
+<script type="text/javascript" src="webjars/lodash/4.17.4/lodash.min.js"></script>
 <script th:inline="javascript">
+    Vue.filter('marked', marked);
     var app = new Vue({
         el: '#app',
         data: {
@@ -67,6 +71,9 @@
                 return self.docs.filter(function (doc) {
                     return doc.name.indexOf(self.name) !== -1
                 })
+            },
+            compiledMarkdown: function () {
+                return marked(this.currentDoc.content, { sanitize: true })
             }
         },
         created: function () {
@@ -82,6 +89,9 @@
                 }.bind(this));
         },
         methods: {
+            update: _.debounce(function (e) {
+                this.currentDoc.content = e.target.value
+            }, 300),
             doCreateNewDoc: function (event) {
                 var createNewDocUrl = this.actions.createDoc.href;
                 console.log("create new doc url: " + createNewDocUrl);
