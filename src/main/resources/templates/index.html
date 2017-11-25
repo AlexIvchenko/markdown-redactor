@@ -7,31 +7,29 @@
 <div th:replace="fragments/header :: page-header"></div>
 
 <div class="container" id="app">
-    <div class="jumbotron">
-        <div class="row">
-            <div class="col-md-8">
-                <h3>Description</h3>
-            </div>
-            <div class="col-md-4 ml-auto">
-                <div class="card">
-                    <div class="card-body">
-                        <form>
-                            <div class="form-group">
-                                <label for="username">Username</label>
-                                <input v-model="user.username" type="text" class="form-control" id="username"
-                                       placeholder="Enter username"/>
-                            </div>
-                            <div class="form-group">
-                                <label for="password">Password</label>
-                                <input v-model="user.password" type="password" class="form-control" id="password"
-                                       aria-describedby="passwordHelp" placeholder="Password"/>
-                                <small id="passwordHelp" class="form-text text-muted">Use at least one letter, one
-                                    numeral, and seven characters.
-                                </small>
-                            </div>
-                            <button class="btn btn-primary btn-lg" v-on:click="doSignUp">Sign Up</button>
-                        </form>
-                    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <h3>Description</h3>
+        </div>
+        <div class="col-md-4 ml-auto">
+            <div class="card">
+                <div class="card-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input v-model="user.username" type="text" class="form-control" id="username"
+                                   placeholder="Enter username"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input v-model="user.password" type="password" class="form-control" id="password"
+                                   aria-describedby="passwordHelp" placeholder="Password"/>
+                            <small id="passwordHelp" class="form-text text-muted">Use at least one letter, one
+                                numeral, and seven characters.
+                            </small>
+                        </div>
+                        <button class="btn btn-primary btn-lg" v-on:click="doSignUp">Sign Up</button>
+                    </form>
                 </div>
             </div>
         </div>
