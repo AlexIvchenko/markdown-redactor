@@ -13,7 +13,6 @@ public class MarkdownInfoRes extends ResourceSupport {
         this.name = name;
     }
 
-
     @JsonProperty
     public String getName() {
         return name;

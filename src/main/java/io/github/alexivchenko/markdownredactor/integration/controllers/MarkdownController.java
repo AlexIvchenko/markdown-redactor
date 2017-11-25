@@ -38,8 +38,8 @@ public class MarkdownController {
     @PostMapping("/api/users/{username}/docs/{docId}")
     public MarkdownRes update(@PathVariable("username") final String username,
                               @PathVariable("docId") final Long docId,
-                              @RequestBody final String content) {
-        return service.update(docId, content);
+                              @RequestBody final MarkdownDto dto) {
+        return service.update(docId, dto.getContent());
     }
 
     @DeleteMapping("/api/users/{username}/docs/{docId}")

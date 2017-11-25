@@ -21,6 +21,10 @@ public class MarkdownResAsm implements ResourceAssembler<Markdown, MarkdownRes> 
         Long id = entity.getOwner().getId();
         res.add(linkTo(methodOn(MarkdownController.class).update(username, id, null))
                 .withSelfRel());
+        res.add(linkTo(methodOn(MarkdownController.class).update(entity.getOwner().getUsername(), entity.getInfo().getId(), null))
+                .withRel("edit"));
+        res.add(linkTo(methodOn(MarkdownController.class).delete(entity.getOwner().getUsername(), entity.getInfo().getId()))
+                .withRel("delete"));
         return res;
     }
 }

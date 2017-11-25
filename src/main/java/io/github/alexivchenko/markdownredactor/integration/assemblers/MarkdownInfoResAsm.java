@@ -18,11 +18,7 @@ public class MarkdownInfoResAsm implements ResourceAssembler<MarkdownInfo, Markd
     public MarkdownInfoRes toResource(MarkdownInfo entity) {
         MarkdownInfoRes res = new MarkdownInfoRes(entity.getName());
         res.add(linkTo(methodOn(MarkdownController.class).getDoc(entity.getOwner().getUsername(), entity.getId()))
-                .withSelfRel());
-        res.add(linkTo(methodOn(MarkdownController.class).update(entity.getOwner().getUsername(), entity.getId(), null))
-                .withRel("edit"));
-        res.add(linkTo(methodOn(MarkdownController.class).delete(entity.getOwner().getUsername(), entity.getId()))
-                .withRel("delete"));
+                .withRel("full"));
         return res;
     }
 }

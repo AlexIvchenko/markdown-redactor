@@ -19,20 +19,22 @@
             </div>
             <div class="list-group" id="list-tab" role="tablist">
                 <a v-for="doc in filteredDocs" v-on:click="toggleSelected(doc)"
-                   class="list-group-item list-group-item-action" data-toggle="list" role="tab" aria-controls="doc">
-                    {{ doc.name }} {{ doc.selected }}</a>
+                   class="list-group-item list-group-item-action" data-toggle="list" role="tab" aria-controls="doc">{{
+                    doc.name }}</a>
             </div>
         </div>
-        <div class="col-8">
-            <div class="tab-content" id="nav-tabContent">
-                <div v-for="doc in filteredDocs" class="tab-pane fade"
-                     v-bind:class="{ show: doc.selected, active: doc.selected }" role="tabpanel">
-                    {{ doc.name }}
-                    {{ doc.selected }}
-                    <button class="btn btn-primary" v-if="doc._links.edit" v-on:click="doEditDoc(doc)">Edit</button>
-                    <button class="btn btn-danger" v-if="doc._links.delete" v-on:click="doDeleteDoc(doc)">Delete
-                    </button>
-                </div>
+        <div class="col-4">
+            <div class="form-group">
+                <label for="content">Content</label>
+                <textarea v-model="currentDoc.content" class="form-control" id="content" rows="20"></textarea>
+            </div>
+            <button class="btn btn-primary" v-if="currentDoc._links.edit" v-on:click="doEditDoc()">Edit</button>
+            <button class="btn btn-danger" v-if="currentDoc._links.delete" v-on:click="doDeleteDoc()">Delete</button>
+        </div>
+        <div class="col-4">
+            <div class="form-group">
+                <label for="content">Markdown</label>
+                <textarea v-model="currentDoc.content" class="form-control" id="markdown" rows="20"></textarea>
             </div>
         </div>
     </div>
@@ -48,8 +50,17 @@
             /*]]>*/
             name: "",
             actions: null,
+            content: '',
+            currentDoc: {
+                name: '',
+                content: '',
+                _links: {
+
+                }
+            },
             docs: []
         },
+
         computed: {
             filteredDocs: function () {
                 var self = this;
@@ -87,12 +98,16 @@
             },
 
             toggleSelected: function (doc) {
-                var i = this.docs.indexOf(doc);
-                this.deselectAllDocs();
-                doc = this.docs[i];
-                doc.selected = true;
-                Vue.set(this.docs, i, doc);
-                console.info(this.docs)
+                console.log('doc' + doc);
+                var getFullUrl = doc._links.full.href;
+                console.log('get full resource url: ' + getFullUrl);
+                axios.get(getFullUrl)
+                    .then(function (response) {
+                        this.currentDoc = response.data;
+                        console.log('current: ' + this.currentDoc);
+                    }.bind(this)).catch(function (error) {
+                    console.error(error);
+                });
             },
 
             deselectAllDocs: function () {
@@ -103,8 +118,8 @@
                 }
             },
 
-            doDeleteDoc: function (doc) {
-                var deleteDocUrl = doc._links.delete.href;
+            doDeleteDoc: function () {
+                var deleteDocUrl = this.currentDoc._links.delete.href;
                 console.log("delete doc url: " + deleteDocUrl);
                 return axios.delete(deleteDocUrl)
                     .then(function (response) {
@@ -112,6 +127,18 @@
                     }.bind(this))
                     .then(function (response) {
                         this.handleGetDocsRequest(response);
+                    }.bind(this))
+                    .catch(function (error) {
+                        console.error(error);
+                    });
+            },
+
+            doEditDoc: function () {
+                var editDocUrl = this.currentDoc._links.edit.href;
+                console.log("edit doc url: " + editDocUrl);
+                return axios.post(editDocUrl, this.currentDoc)
+                    .then(function (response) {
+                        console.log(response)
                     }.bind(this))
                     .catch(function (error) {
                         console.error(error);
