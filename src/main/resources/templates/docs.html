@@ -26,7 +26,8 @@
         <div class="col-4">
             <div class="form-group">
                 <label for="content">Content</label>
-                <textarea v-model="currentDoc.content" v-on:input="update" class="form-control" id="content" rows="20"></textarea>
+                <textarea v-model="currentDoc.content" v-on:input="update" class="form-control" id="content"
+                          rows="20"></textarea>
             </div>
             <button class="btn btn-primary" v-if="currentDoc._links.edit" v-on:click="doEditDoc()">Save</button>
             <button class="btn btn-danger" v-if="currentDoc._links.delete" v-on:click="doDeleteDoc()">Delete</button>
@@ -58,9 +59,7 @@
             currentDoc: {
                 name: '',
                 content: '',
-                _links: {
-
-                }
+                _links: {}
             },
             docs: []
         },
@@ -73,7 +72,7 @@
                 })
             },
             compiledMarkdown: function () {
-                return marked(this.currentDoc.content, { sanitize: true })
+                return marked(this.currentDoc.content, {sanitize: true})
             }
         },
         created: function () {

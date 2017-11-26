@@ -6,7 +6,7 @@
             <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{15}) - %highlight(%msg%n)</pattern>
         </encoder>
     </appender>
-    <root level="info">
+    <root level="warn">
         <appender-ref ref="STDOUT" />
     </root>
     <logger name="io.github.alexivchenko.markdownredactor" level="debug" additivity="false">
