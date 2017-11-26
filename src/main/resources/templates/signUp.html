@@ -10,22 +10,20 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-body">
-                <form>
-                    <div class="form-group">
-                        <label for="username">Username</label>
-                        <input v-model="user.username" type="text" class="form-control" id="username"
-                               placeholder="Enter username"/>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input v-model="user.password" type="password" class="form-control" id="password"
-                               aria-describedby="passwordHelp" placeholder="Password"/>
-                        <small id="passwordHelp" class="form-text text-muted">Use at least one letter, one
-                            numeral, and seven characters.
-                        </small>
-                    </div>
-                    <button class="btn btn-primary btn-lg" v-on:click="doSignUp">Sign Up </button>
-                </form>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input v-model="user.username" type="text" class="form-control" id="username"
+                           placeholder="Enter username"/>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input v-model="user.password" type="password" class="form-control" id="password"
+                           aria-describedby="passwordHelp" placeholder="Password"/>
+                    <small id="passwordHelp" class="form-text text-muted">Use at least one letter, one
+                        numeral, and seven characters.
+                    </small>
+                </div>
+                <button class="btn btn-primary btn-lg" v-on:click="doSignUp">Sign Up</button>
             </div>
         </div>
     </div>
@@ -56,6 +54,7 @@
                 console.log('create user url = ' + createUserUrl);
                 axios.post(createUserUrl, this.user).then(function (response) {
                     console.log(response);
+                    window.location.href = '/docs';
                 }).catch(function (error) {
                     console.log(error);
                 });
