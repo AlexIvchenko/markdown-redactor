@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:v-on="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:replace="fragments/header :: header('Markdown Redactor')"></head>
+<body>
+
+<div th:replace="fragments/header :: page-header"></div>
+
+<div class="container" id="app">
+    <div class="row">
+        <div class="col-4">
+            <div class="form-group">
+                <label for="content">Markdown</label>
+                <textarea v-model="markdown" v-on:input="update" class="form-control" id="content" rows="20"></textarea>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="form-group">
+                <label>Preview</label>
+                <div v-html="compiledMarkdown"></div>
+            </div>
+        </div>
+        <div class="col-md-4 ml-auto" sec:authorize="!isAuthenticated()">
+            <div class="card">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input v-model="user.username" type="text" class="form-control" id="username"
+                               placeholder="Enter username"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input v-model="user.password" type="password" class="form-control" id="password"
+                               aria-describedby="passwordHelp" placeholder="Password"/>
+                        <small id="passwordHelp" class="form-text text-muted">Use at least one letter, one
+                            numeral, and seven characters.
+                        </small>
+                    </div>
+                    <button class="btn btn-primary btn-lg" v-on:click="doSignUp">Sign Up</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+<script type="text/javascript" src="webjars/marked/0.3.2/marked.js"></script>
+<script type="text/javascript" src="webjars/lodash/4.17.4/lodash.min.js"></script>
+<script th:inline="javascript">
+    var app = new Vue({
+        el: '#app',
+        data: {
+            /*<![CDATA[*/
+            api: /*[[${api}]]*/ null,
+            /*]]>*/
+            user: {
+                username: "",
+                password: ""
+            },
+            markdown: '',
+            actions: null
+        },
+        created: function () {
+            console.log("vue created");
+            this.loadActions()
+        },
+        computed: {
+            compiledMarkdown: function () {
+                return marked(this.markdown, {sanitize: true})
+            }
+        },
+        methods: {
+            update: _.debounce(function (e) {
+                this.markdown = e.target.value
+            }, 300),
+
+            doSignUp: function (event) {
+                var createUserUrl = this.actions.signUp.href;
+                console.log('create user url = ' + createUserUrl);
+                axios.post(createUserUrl, this.user).then(function (response) {
+                    console.log(response);
+                    window.location.href = '/docs';
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            loadActions: function () {
+                console.log("load actions");
+                axios.get(this.api).then(function (response) {
+                    this.actions = response.data._links;
+                }.bind(this));
+            }
+        }
+    })
+</script>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:v-on="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/header :: header('Markdown Redactor')"></head>
+<body>
+
+<div th:replace="fragments/header :: page-header"></div>
+
+<div class="container" id="app">
+    <div class="row">
+        <div class="col-4">
+            <div class="input-group">
+                <input type="text" class="form-control" v-model="name" placeholder="Search for..."
+                       aria-label="Search for..."/>
+                <span class="input-group-btn">
+                <button class="btn btn-secondary" v-if="filteredDocs.length == 0"
+                        v-on:click="doCreateNewDoc" type="button">Create!</button>
+                </span>
+            </div>
+            <div class="list-group" id="list-tab" role="tablist">
+                <a v-for="doc in filteredDocs" v-on:click="toggleSelected(doc)"
+                   class="list-group-item list-group-item-action" data-toggle="list" role="tab" aria-controls="doc">{{
+                    doc.name }}</a>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="form-group">
+                <label for="content">Content</label>
+                <textarea v-model="currentDoc.content" v-on:input="update" class="form-control" id="content"
+                          rows="20"></textarea>
+            </div>
+            <button class="btn btn-primary" v-if="currentDoc._links.edit" v-on:click="doEditDoc()">Save</button>
+            <button class="btn btn-danger" v-if="currentDoc._links.delete" v-on:click="doDeleteDoc()">Delete</button>
+        </div>
+        <div class="col-4">
+            <div class="form-group">
+                <label>Markdown</label>
+                <div v-html="compiledMarkdown"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+<script type="text/javascript" src="webjars/marked/0.3.2/marked.js"></script>
+<script type="text/javascript" src="webjars/lodash/4.17.4/lodash.min.js"></script>
+<script th:inline="javascript">
+    Vue.filter('marked', marked);
+    var app = new Vue({
+        el: '#app',
+        data: {
+            /*<![CDATA[*/
+            api: /*[[${api}]]*/ null,
+            /*]]>*/
+            name: "",
+            actions: null,
+            content: '',
+            currentDoc: {
+                name: '',
+                content: '',
+                _links: {}
+            },
+            docs: []
+        },
+
+        computed: {
+            filteredDocs: function () {
+                var self = this;
+                return self.docs.filter(function (doc) {
+                    return doc.name.indexOf(self.name) !== -1
+                })
+            },
+            compiledMarkdown: function () {
+                return marked(this.currentDoc.content, {sanitize: true})
+            }
+        },
+        created: function () {
+            console.log("vue created");
+            this.createLoadActionsRequest()
+                .then(function (response) {
+                    this.handleLoadActionsRequest(response);
+                    return this.createGetDocsRequest();
+                }.bind(this))
+                .then(function (response) {
+                    this.handleGetDocsRequest(response);
+                    console.log(this.docs);
+                }.bind(this));
+        },
+        methods: {
+            update: _.debounce(function (e) {
+                this.currentDoc.content = e.target.value
+            }, 300),
+            doCreateNewDoc: function (event) {
+                var createNewDocUrl = this.actions.createDoc.href;
+                console.log("create new doc url: " + createNewDocUrl);
+                return axios.post(createNewDocUrl, {name: this.name, content: ''})
+                    .then(function (response) {
+                        return this.createGetDocsRequest();
+                    }.bind(this))
+                    .then(function (response) {
+                        this.handleGetDocsRequest(response);
+                    }.bind(this))
+                    .catch(function (error) {
+                        console.error(error);
+                    });
+            },
+
+            toggleSelected: function (doc) {
+                console.log('doc' + doc);
+                var getFullUrl = doc._links.full.href;
+                console.log('get full resource url: ' + getFullUrl);
+                axios.get(getFullUrl)
+                    .then(function (response) {
+                        this.currentDoc = response.data;
+                        console.log('current: ' + this.currentDoc);
+                    }.bind(this)).catch(function (error) {
+                    console.error(error);
+                });
+            },
+
+            deselectAllDocs: function () {
+                for (let i = 0; i < this.docs.length; i++) {
+                    const doc = this.docs[i];
+                    doc.selected = false;
+                    Vue.set(this.docs, i, doc);
+                }
+            },
+
+            doDeleteDoc: function () {
+                var deleteDocUrl = this.currentDoc._links.delete.href;
+                console.log("delete doc url: " + deleteDocUrl);
+                return axios.delete(deleteDocUrl)
+                    .then(function (response) {
+                        return this.createGetDocsRequest();
+                    }.bind(this))
+                    .then(function (response) {
+                        this.handleGetDocsRequest(response);
+                    }.bind(this))
+                    .catch(function (error) {
+                        console.error(error);
+                    });
+            },
+
+            doEditDoc: function () {
+                var editDocUrl = this.currentDoc._links.edit.href;
+                console.log("edit doc url: " + editDocUrl);
+                return axios.post(editDocUrl, this.currentDoc)
+                    .then(function (response) {
+                        console.log(response)
+                    }.bind(this))
+                    .catch(function (error) {
+                        console.error(error);
+                    });
+            },
+
+            createGetDocsRequest: function () {
+                var getDocsUrl = this.actions.getDocs.href;
+                console.log("get docs url: " + getDocsUrl);
+                return axios.get(getDocsUrl);
+            },
+
+            handleGetDocsRequest: function (response) {
+                this.docs = response.data;
+                this.deselectAllDocs();
+            },
+
+            createLoadActionsRequest: function () {
+                console.log("api url: " + this.api);
+                return axios.get(this.api);
+            },
+
+            handleLoadActionsRequest: function (response) {
+                this.actions = response.data._links;
+                console.log("actions: " + this.actions);
+            }
+        }
+    })
+</script>
+</html>

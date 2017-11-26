@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:v-on="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:replace="fragments/header :: header('Markdown Redactor')"></head>
+<body>
+
+<div th:replace="fragments/header :: page-header"></div>
+
+<div class="container" id="app">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input v-model="user.username" type="text" class="form-control" id="username"
+                           placeholder="Enter username"/>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input v-model="user.password" type="password" class="form-control" id="password"
+                           aria-describedby="passwordHelp" placeholder="Password"/>
+                    <small id="passwordHelp" class="form-text text-muted">Use at least one letter, one
+                        numeral, and seven characters.
+                    </small>
+                </div>
+                <button class="btn btn-primary btn-lg" v-on:click="doSignUp">Sign Up</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+<script th:inline="javascript">
+    var app = new Vue({
+        el: '#app',
+        data: {
+            /*<![CDATA[*/
+            api: /*[[${api}]]*/ null,
+            /*]]>*/
+            user: {
+                username: "",
+                email: "",
+                password: ""
+            },
+            actions: null
+        },
+        created: function () {
+            console.log("vue created");
+            this.loadActions()
+        },
+        methods: {
+            doSignUp: function (event) {
+                var createUserUrl = this.actions.signUp.href;
+                console.log('create user url = ' + createUserUrl);
+                axios.post(createUserUrl, this.user).then(function (response) {
+                    console.log(response);
+                    window.location.href = '/docs';
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            loadActions: function () {
+                console.log("load actions");
+                axios.get(this.api).then(function (response) {
+                    this.actions = response.data._links;
+                }.bind(this));
+            }
+        }
+    })
+</script>
+</html>
